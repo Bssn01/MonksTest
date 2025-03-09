@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <base target="_top">
+    <style>
+      :root {
+        --primary-color: #ff6b81;
+        --primary-hover: #ff4757;
+        --background-color: #C7B6B6;
+        --box-background: #ffffff;
+        --text-color: #333333;
+        --secondary-text: #666666;
+      }
+      body {
+        font-family: 'Poppins', Arial, sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .app-container {
+        display: flex;
+        flex-direction: row;
+        width: 90%;
+        max-width: 1000px;
+        gap: 20px;
+      }
+      .filter-container,
+      .results-container {
+        background-color: var(--box-background);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      }
+      .filter-container {
+        width: 100%;
+      }
+      .results-container {
+        width: 100%;
+        max-height: 450px;
+        overflow-y: auto;
+      }
+      h2 {
+        color: var(--text-color);
+        font-weight: 500;
+        font-size: 22px;
+        text-align: center;
+        margin: 0 0 20px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        font-size: 14px;
+        color: var(--secondary-text);
+        margin-bottom: 8px;
+        font-weight: 400;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-sizing: border-box;
+        background-color: var(--box-background);
+      }
+    
+      .price-inputs {
+        display: flex;
+        gap: 10px;
+      }
+      .button-group {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 25px;
+      }
+      button {
+        flex: 1;
+        padding: 12px 0;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        background-color: var(--primary-color);
+        color: #ffffff;
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background-color: var(--primary-hover);
+      }
+      .message {
+        margin-top: 15px;
+        color: green;
+        text-align: center;
+        font-size: 14px;
+      }
+      .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      .results-table th {
+        background-color: var(--primary-color);
+        color: #ffffff;
+        font-weight: 500;
+        text-align: left;
+        padding: 12px;
+        border-bottom: 2px solid #e0e0e0;
+      }
+      .results-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #e0e0e0;
+        font-size: 13px;
+      }
+      .results-table tr:hover {
+        background-color: #f9f5ff;
+      }
+      .results-count {
+        color: var(--secondary-text);
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+      .no-results,
+      .loading {
+        text-align: center;
+        color: var(--secondary-text);
+        padding: 20px;
+      }
+      .product-card {
+        background-color: var(--box-background);
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      .product-card p {
+        margin: 3px 0;
+        font-size: 13px;
+        color: var(--secondary-text);
+      }
+      .product-card strong {
+        color: var(--primary-color);
+      }
+      
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="filter-container">
+        <h2>Products Filter</h2>
+        <form id="filterForm" onsubmit="handleSubmit(event)">
+          <div class="form-group">
+            <label for="minPrice">Price Range</label>
+            <div class="price-inputs">
+              <input type="number" id="minPrice" name="minPrice" placeholder="Min" />
+              <input type="number" id="maxPrice" name="maxPrice" placeholder="Max" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="color">Color</label>
+            <select id="color" name="color">
+              <option value="">Select</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="size">Size</label>
+            <select id="size" name="size">
+              <option value="">Select</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender">
+              <option value="">Select</option>
+            </select>
+          </div>
+          <div class="button-group">
+            <button type="submit">Apply Filters</button>
+            <button type="button" onclick="clearFilters()">Clear Filters</button>
+          </div>
+        </form>
+        <div id="message" class="message"></div>
+      </div>
+      <div class="results-container">
+        <h2>Filtered Products</h2>
+        <div id="results-content">
+          <div class="loading">Loading products...</div>
+        </div>
+      </div>
+    </div>
+    <script>
+      function populateFilters() {
+        google.script.run.withSuccessHandler((options) => {
+          const colorSelect = document.getElementById('color');
+          options.colors.forEach((color) => {
+            const option = document.createElement('option');
+            option.value = color;
+            option.text = color;
+            colorSelect.add(option);
+          });
+          const sizeSelect = document.getElementById('size');
+          options.sizes.forEach((size) => {
+            const option = document.createElement('option');
+            option.value = size;
+            option.text = size;
+            sizeSelect.add(option);
+          });
+          const genderSelect = document.getElementById('gender');
+          options.genders.forEach((gender) => {
+            const option = document.createElement('option');
+            option.value = gender;
+            option.text = gender;
+            genderSelect.add(option);
+          });
+        }).getFilterOptions();
+        loadProductData();
+      }
+
+      function loadProductData() {
+        document.getElementById('results-content').innerHTML =
+          '<div class="loading">Loading products...</div>';
+        google.script.run.withSuccessHandler(displayResults).getProductData();
+      }
+
+      function handleSubmit(event) {
+        event.preventDefault();
+        const filters = {
+          minPrice: document.getElementById('minPrice').value,
+          maxPrice: document.getElementById('maxPrice').value,
+          color: document.getElementById('color').value,
+          size: document.getElementById('size').value,
+          gender: document.getElementById('gender').value,
+        };
+        document.getElementById('message').innerText = 'Filtering in progress...';
+        document.getElementById('results-content').innerHTML =
+          '<div class="loading">Filtering products...</div>';
+        google.script.run.withSuccessHandler((results) => {
+          document.getElementById('message').innerText = 'Filtering completed.';
+          displayResults(results);
+        }).filterProductsWithResults(filters);
+      }
+
+      function displayResults(results) {
+        const resultsContainer = document.getElementById('results-content');
+        if (!results || results.length <= 1) {
+          resultsContainer.innerHTML =
+            '<div class="no-results">No products found matching your criteria.</div>';
+          return;
+        }
+        const headers = results[0];
+        const data = results.slice(1);
+        const isMobile = window.innerWidth < 768;
+        let html = '';
+        if (isMobile) {
+          data.forEach((row) => {
+            html += '<div class="product-card">';
+            headers.forEach((header, index) => {
+              html += `<p><strong>${header}:</strong> ${
+                header.toUpperCase() === 'PRICE' ? '$' + parseFloat(row[index]).toFixed(2) : row[index]
+              }</p>`;
+            });
+            html += '</div>';
+          });
+        } else {
+          html += `<div class="results-count">${data.length} products found</div><table class="results-table"><thead><tr>`;
+          headers.forEach((header) => (html += `<th>${header}</th>`));
+          html += '</tr></thead><tbody>';
+          data.forEach((row) => {
+            html += '<tr>';
+            row.forEach((cell, index) => {
+              html += `<td>${
+                headers[index].toUpperCase() === 'PRICE' ? '$' + parseFloat(cell).toFixed(2) : cell
+              }</td>`;
+            });
+            html += '</tr>';
+          });
+          html += '</tbody></table>';
+        }
+        resultsContainer.innerHTML = html;
+      }
+
+      function clearFilters() {
+        document.getElementById('filterForm').reset();
+        document.getElementById('message').innerText = '';
+        loadProductData();
+      }
+
+      window.onload = populateFilters;
+    </script>
+  </body>
+</html>
