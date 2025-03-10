@@ -1,0 +1,20 @@
+ Hi Person, 
+
+ I'm here to explain a interface that I made to facilitate the filtering process of the sheet. The use is very straight forward, I've made the interface in a way that you don't need to go into the code part. 
+
+ Okay, let's go to how to use, I'll make a step-by-step: 
+
+	-Make sure that you are in the correct google sheet
+	-In the sheet, click in the menu Filter products, then click in open filter interface. If it is your first use, you have to authorize the use of the script, to authorize you need to click in advanced and then click "Access MonksSweTest". After that it will open another window and you need to click in allow, succeeding this the interface should open, if doesn't open you just need to repeat the process.
+	-With the interface opened, it should appear two windows, one called "Products Filter" and the other "Filtered Products".
+	-To make the selections for filtering you use the "Products Filter", in there you can select one or more filters to apply.
+	-To see the filtered sheet you can see in the other window "Filtered Products" or you can close the interface and open the FilteredResults tab in the sheet.
+	-If you want to make other filter you have to repeat the process of open the interface, and then make new filter.
+
+
+ This should help you with the use of the filter, if you need any help feel free to reach me out.
+ 
+ Regards,
+ Eduardo 
+
+
